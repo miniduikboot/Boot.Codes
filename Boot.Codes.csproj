@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- TODO: remove when 1.4.0 releases -->
+    <!--<PackageReference Include="Impostor.Api" Version="1.3.0-ci.131" />-->
+    <ProjectReference Include="../Impostor/src/Impostor.Api/Impostor.Api.csproj"/>
+    <PackageReference Include="System.Resources.Extensions" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>
