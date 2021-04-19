@@ -1,20 +1,18 @@
-using Impostor.Api.Events;
+using System;
+using Impostor.Api.Net.Manager;
 using Impostor.Api.Plugins;
-using Boot.Codes.Handlers;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Impostor.Plugins.Example
+namespace Boot.Codes
 {
     public class ExamplePluginStartup : IPluginStartup
     {
-        public void ConfigureHost(IHostBuilder host)
-        {
-        }
+        public void ConfigureHost(IHostBuilder host) { }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IEventListener, GameEventListener>();
+            services.AddSingleton<IGameCodeManager, GameCodeManager>();
         }
     }
 }

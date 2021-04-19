@@ -4,23 +4,22 @@ using Microsoft.Extensions.Logging;
 
 namespace Boot.Codes
 {
-    [ImpostorPlugin(
-            "at.duikbo.codes",
-            "BootCodes",
-            "miniduikboot",
-            "0.1")]
+    [ImpostorPlugin("at.duikbo.codes", "BootCodes", "miniduikboot", "0.1")]
     public class BootCodesPlugin : PluginBase
     {
-        readonly ILogger<BootCodesPlugin> logger;
+        private readonly ILogger<BootCodesPlugin> _logger;
 
-        public BootCodesPlugin(ILogger<BootCodesPlugin> logger)
+        private readonly IGameCodeManager _manager;
+
+        public BootCodesPlugin(ILogger<BootCodesPlugin> logger, IGameCodeManager manager)
         {
-            this.logger = logger;
+            this._logger = logger;
+            this._manager = manager;
         }
 
         public override ValueTask EnableAsync()
         {
-            logger.LogInformation("Boot.Codes initializing");
+            _logger.LogInformation($"Boot.Codes initialized with names from {_manager.Path}");
             return default;
         }
 
