@@ -35,14 +35,14 @@ namespace Boot.Codes
 
             if (validCodes.Count == 0)
             {
-                _logger.LogError($"Boot.Codes: No codes loaded.");
+                _logger.LogError("Boot.Codes: No codes loaded.");
                 return;
             }
 
             this._codes = new ConcurrentQueue<GameCode>(validCodes);
             this._inUse = new ConcurrentDictionary<GameCode, bool>();
 
-            _logger.LogInformation($"Boot.Codes: Loaded {this._codes.Count} codes.");
+            _logger.LogInformation("Boot.Codes: Loaded {Count} codes.", this._codes.Count);
             eventManager.RegisterListener(new GameEventListener(this));
         }
 
@@ -56,16 +56,16 @@ namespace Boot.Codes
 
                 foreach (var line in invalid)
                 {
-                    _logger.LogWarning($"Boot.Codes: The code \"{line}\" is invalid");   
+                    _logger.LogWarning("Boot.Codes: The code \"{line}\" is invalid", line);
                 }
 
                 return valid;
             }
-            
-            _logger.LogWarning("Boot.Codes: No word list specified. Creating one with the default words");
+
+            _logger.LogWarning("Boot.Codes: Could not find list in \"{path}\". Using built-in list", Path);
             var text = Resources.defaultWords;
             File.WriteAllText(Path, text, Encoding.UTF8);
-            return text.Split(new[] {"\r\n"}, StringSplitOptions.None);
+            return text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
         }
 
         public GameCode Get()
