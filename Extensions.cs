@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Boot.Codes
 {
@@ -11,20 +7,20 @@ namespace Boot.Codes
     {
         private static readonly Random WeakRng = new Random();
 
-        public static IList<T> Shuffle<T>(this IList<T> list)
+        /**
+         * Shuffle the array in-place.
+         */
+        public static void Shuffle<T>(this IList<T> list)
         {
+            // Implementation of the Fisher-Yates shuffle
             var size = list.Count;
-            while (size > 1)
+            for (var i = 0; i < size - 2; i++)
             {
-                var i = WeakRng.Next(0, size);
-                size--;
+                var j = WeakRng.Next(i, size);
                 var value = list[i];
-
-                list[i] = list[size];
-                list[size] = value;
+                list[i] = list[j];
+                list[j] = value;
             }
-
-            return list;
         }
     }
 }

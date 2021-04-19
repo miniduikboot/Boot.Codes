@@ -30,7 +30,8 @@ namespace Boot.Codes
             this._codeFactory = codeFactory;
             logger.LogInformation("Boot.Codes: Reading file.");
 
-            var validCodes = Read().Select(code => new GameCode(code)).Where(code => !code.IsInvalid).ToList().Shuffle();
+            var validCodes = Read().Select(code => new GameCode(code)).Where(code => !code.IsInvalid).ToList();
+            validCodes.Shuffle();
 
             if (validCodes.Count == 0)
             {
