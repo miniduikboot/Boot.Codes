@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Impostor.Api.Plugins;
 using Microsoft.Extensions.Logging;

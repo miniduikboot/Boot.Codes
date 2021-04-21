@@ -1,18 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Impostor.Api.Games;
 using Boot.Codes.Handlers;
-using Boot.Codes.Properties;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Diagnostics.Contracts;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
-using System.Security.Claims;
-using System.Threading;
 using Impostor.Api.Events.Managers;
 using Microsoft.Extensions.Logging;
 
@@ -20,6 +11,8 @@ namespace Boot.Codes
 {
     public class GameCodeManager : IGameCodeManager
     {
+        private static readonly HashSet<char> V2Chars = "QWXRTYLPESDFGHUJKZOCVBINMA".ToHashSet();
+
         private readonly List<GameCode> _codes;
 
         private readonly HashSet<GameCode> _inUse;
@@ -84,7 +77,7 @@ namespace Boot.Codes
                     if(trimStart.StartsWith(comment[0])) continue;
                     var codeStr = trimStart.Split(comment, 2, splitOptions)[0].TrimEnd();
 
-                    if (codeStr.Length != 6 && codeStr.Length != 4 || codeStr.Any(c=>!char.IsLetter(c)))
+                    if (codeStr.Length != 6 && codeStr.Length != 4 || codeStr.Any(c=>!V2Chars.Contains(c)))
                     {
                         if (invalid++ < 5) _logger.LogWarning("Boot.Codes: The code \"{code}\" is invalid!", codeStr);
                         if (invalid == 6) _logger.LogWarning("Boot.Codes: Found more invalid codes, please check your input files and clean them up");

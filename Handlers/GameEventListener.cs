@@ -1,7 +1,4 @@
 using Impostor.Api.Events;
-using Impostor.Api.Games;
-using Microsoft.Extensions.Logging;
-using System;
 
 namespace Boot.Codes.Handlers
 {
