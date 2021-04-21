@@ -4,12 +4,12 @@ namespace Boot.Codes
 {
     public static class Extensions
     {
-        /**
-         * Shuffle the array in-place.
-         */
-        public static T Shuffle<T>(this T list) where T : IList
+        /// <summary>
+        /// Implementation of the Fisher-Yates shuffle.
+        /// Shuffles the list in place.
+        /// </summary>
+        public static void Shuffle<T>(this T list) where T : IList
         {
-            // Implementation of the Fisher-Yates shuffle
             var size = list.Count;
             for (var i = 0; i < size - 2; i++)
             {
@@ -18,9 +18,6 @@ namespace Boot.Codes
                 list[i] = list[j];
                 list[j] = value;
             }
-
-            // allows method chaining
-            return list;
         }
     }
 }
