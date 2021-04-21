@@ -8,6 +8,7 @@ using Boot.Codes.Handlers;
 using Boot.Codes.Properties;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Diagnostics.Contracts;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Security.Claims;
@@ -41,23 +42,23 @@ namespace Boot.Codes
             this._codeFactory = codeFactory;
             logger.LogInformation("Boot.Codes: Reading files from {Path}", Path);
 
-            var validCodes = Read().Select(code => new GameCode(code)).Where(code => !code.IsInvalid).AsParallel().ToList().Shuffle();
+            var validCodes = Read().ToList().Shuffle();
 
             if (validCodes.Count == 0) return;
 
             this.FourCharCodes = validCodes.Count(code => code.Code.Length == 4);
             this.SixCharCodes = validCodes.Count(code => code.Code.Length == 6);
+
             var total = SixCharCodes + FourCharCodes;
             _logger.LogInformation("Boot.Codes: {total} codes total.", total);
 
             this._codes = validCodes;
             this._inUse = new HashSet<GameCode>();
-
-
+            
             eventManager.RegisterListener(new GameEventListener(this));
         }
 
-        private IEnumerable<string> Read()
+        private IEnumerable<GameCode> Read()
         {
             var dirInfo = new DirectoryInfo(Path);
 
@@ -68,51 +69,48 @@ namespace Boot.Codes
             }
 
             var comment = new[] { "--" };
-            var words = new HashSet<string>();
+            var codes = new HashSet<GameCode>();
 
             const StringSplitOptions splitOptions = StringSplitOptions.None;
+
             var startTime = DateTime.Now;
-            
+            var invalid = 0;
+
             foreach (var file in dirInfo.GetFiles())
             {
                 _logger.LogInformation("Boot.Codes: reading \"{Name}\"", file.Name);
 
-                var query = (File.ReadLines(file.FullName, Encoding.UTF8)
-                    .Where(line => !string.IsNullOrWhiteSpace(line) && !line.TrimStart().StartsWith(comment[0]))
-                    .Select(record => record.Trim().Split(comment, 2, splitOptions)[0].ToUpper().TrimEnd()))
-                    .Where(c => !words.Contains(c)).AsParallel();
-
-                foreach (var result in query) words.Add(result);
-            }
-
-            if (words.Count == 0) goto fail;
-
-            // HashSet for fast lookup.
-            var valid = new List<string>();
-            var invalid = 0;
-            foreach (var word in words)
-            {
-                if (word.Length == 6 || word.Length == 4)
+                foreach (var line in File.ReadLines(file.FullName))
                 {
-                    valid.Add(word);
-                }
-                else
-                {
-                    if (invalid++ < 5) _logger.LogWarning("Boot.Codes: The code \"{line}\" is invalid!", word);
-                    if (invalid == 6) _logger.LogWarning("Boot.Codes: Found more invalid codes, please check your input files and clean them up");
+                    if(string.IsNullOrWhiteSpace(line)) continue;
+                    var trimStart = line.TrimStart();
+                    if(trimStart.StartsWith(comment[0])) continue;
+                    var codeStr = trimStart.Split(comment, 2, splitOptions)[0].TrimEnd();
+
+                    if (codeStr.Length != 6 && codeStr.Length != 4)
+                    {
+                        if (invalid++ < 5) _logger.LogWarning("Boot.Codes: The code \"{code}\" is invalid!", codeStr);
+                        if (invalid == 6) _logger.LogWarning("Boot.Codes: Found more invalid codes, please check your input files and clean them up");
+                        continue;
+                    }
+
+                    var code = new GameCode(codeStr);
+                    if (!code.IsInvalid && !codes.Contains(code)) codes.Add(code);
+                    else invalid++;
                 }
             }
+
+            if (codes.Count == 0) goto fail;
 
             _logger.LogInformation("Boot.Codes: Finished loading files in {Seconds} seconds, with {invalids} invalid codes.", (DateTime.Now - startTime).Seconds, invalid);
 
-            return valid;
+            return codes;
 
             fail:
             {
-                _logger.LogWarning("Boot.Codes: No word list found.");
-                return Enumerable.Empty<string>();
+                _logger.LogWarning("Boot.Codes: No valid word list found.");
+                return Enumerable.Empty<GameCode>();
             }
-
         }
 
         public GameCode Get()
