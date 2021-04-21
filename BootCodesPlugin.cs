@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Impostor.Api.Plugins;
 using Microsoft.Extensions.Logging;
@@ -19,12 +20,10 @@ namespace Boot.Codes
 
         public override ValueTask EnableAsync()
         {
-            _logger.LogInformation("Boot.Codes: loaded {FourCharCodes} 4-char codes and {SixCharCodes} 6-char codes from {Path}!", _manager.FourCharCodes, _manager.SixCharCodes, _manager.Path);
-            return default;
-        }
-
-        public override ValueTask DisableAsync()
-        {
+            var sum = _manager.FourCharCodes + _manager.SixCharCodes;
+            _logger.LogInformation(
+                "Boot.Codes: loaded {FourCharCodes} 4-char codes and {SixCharCodes} 6-char codes [{Total} total] from {Path}!",
+                _manager.FourCharCodes, _manager.SixCharCodes, sum, _manager.Path);
             return default;
         }
     }
