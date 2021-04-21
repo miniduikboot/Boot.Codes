@@ -11,7 +11,7 @@ namespace Boot.Codes
 {
     public class GameCodeManager : IGameCodeManager
     {
-        private static readonly HashSet<char> V2Chars = "QWXRTYLPESDFGHUJKZOCVBINMA".ToHashSet();
+        private static readonly HashSet<char> V2Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToHashSet();
 
         private readonly List<GameCode> _codes;
 
@@ -35,9 +35,10 @@ namespace Boot.Codes
             this._codeFactory = codeFactory;
             logger.LogInformation("Boot.Codes: Reading files from {Path}", Path);
 
-            var validCodes = Read().ToList().Shuffle();
-
+            var validCodes = Read().ToList();
             if (validCodes.Count == 0) return;
+
+            validCodes.Shuffle();
 
             this.FourCharCodes = validCodes.Count(code => code.Code.Length == 4);
             this.SixCharCodes = validCodes.Count(code => code.Code.Length == 6);
