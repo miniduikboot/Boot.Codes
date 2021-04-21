@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Impostor.Api.Games;
+﻿using Impostor.Api.Games;
 
 namespace Boot.Codes
 {
     public interface IGameCodeManager
     {
+        int SixCharCodes { get; }
+
+        int FourCharCodes { get; }
+
         string Path { get; }
 
         GameCode Get();
