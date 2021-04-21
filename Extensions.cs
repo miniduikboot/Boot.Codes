@@ -10,7 +10,7 @@ namespace Boot.Codes
         /**
          * Shuffle the array in-place.
          */
-        public static void Shuffle<T>(this IList<T> list)
+        public static IList<T> Shuffle<T>(this IList<T> list)
         {
             // Implementation of the Fisher-Yates shuffle
             var size = list.Count;
@@ -21,6 +21,9 @@ namespace Boot.Codes
                 list[i] = list[j];
                 list[j] = value;
             }
+
+            // allows method chaining
+            return list;
         }
     }
 }
