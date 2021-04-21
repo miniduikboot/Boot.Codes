@@ -49,9 +49,6 @@ namespace Boot.Codes
             this.FourCharCodes = validCodes.Count(code => code.Code.Length == 4);
             this.SixCharCodes = validCodes.Count(code => code.Code.Length == 6);
 
-            var total = SixCharCodes + FourCharCodes;
-            _logger.LogInformation("Boot.Codes: {total} codes total.", total);
-
             this._codes = validCodes;
             this._inUse = new HashSet<GameCode>();
             
@@ -87,7 +84,7 @@ namespace Boot.Codes
                     if(trimStart.StartsWith(comment[0])) continue;
                     var codeStr = trimStart.Split(comment, 2, splitOptions)[0].TrimEnd();
 
-                    if (codeStr.Length != 6 && codeStr.Length != 4)
+                    if (codeStr.Length != 6 && codeStr.Length != 4 || codeStr.Any(c=>!char.IsLetter(c)))
                     {
                         if (invalid++ < 5) _logger.LogWarning("Boot.Codes: The code \"{code}\" is invalid!", codeStr);
                         if (invalid == 6) _logger.LogWarning("Boot.Codes: Found more invalid codes, please check your input files and clean them up");
