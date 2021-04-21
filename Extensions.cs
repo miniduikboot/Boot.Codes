@@ -5,8 +5,6 @@ namespace Boot.Codes
 {
     public static class Extensions
     {
-        private static readonly Random WeakRng = new Random();
-
         /**
          * Shuffle the array in-place.
          */
@@ -16,7 +14,7 @@ namespace Boot.Codes
             var size = list.Count;
             for (var i = 0; i < size - 2; i++)
             {
-                var j = WeakRng.Next(i, size);
+                var j = StrongRandom.Next(i, size);
                 var value = list[i];
                 list[i] = list[j];
                 list[j] = value;
