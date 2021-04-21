@@ -2,7 +2,7 @@
 
 ## 1. What does it do?
 
-This Impostor plugin reads a list of 6/4 character long words, and will assign them to lobbies when they are created. Once the list is exhausted, game codes are assigned randomly, as usual.
+This Impostor plugin reads lists of 6/4 character long words, and will assign them to lobbies when they are created. Once the lists are exhausted, game codes will be assigned "randomly", as usual.
 
 ## 2. How to use it?
 
@@ -12,15 +12,15 @@ This Impostor plugin reads a list of 6/4 character long words, and will assign t
 
 ​	Wordlists may include comments with a prefix of `--`. Lines starting with the sequence will be ignored, but lines with codes may contain comments, as long as the game code precedes the comment.
 
-​	The wordlist must be put on the server's root, under the name `Boot.Codes.txt`.
+​	The wordlist(s) must be put on the server's root, in a folder called `Boot.Codes`.
 
-​	After you have a compatible Impostor server, and a wordlist, you may download the latest release and add the DLL to `plugins` folder.
+​	After you have a compatible Impostor server, and at least one wordlist, you may download the latest release and add the DLL to the `plugins` folder.
 
 ### 2. Usage
 
-​	Once you have correctly installed it, you should see a message in the console when the server is starting, showing how many codes were loaded. If you see a message indicating that no codes were loaded, your wordlist is invalid. You may also see messages warning you of invalid codes.
+​	Once you have correctly installed it, you should see a message in the console when the server is starting, showing how many codes were loaded. If you see a message indicating that no codes were loaded, your wordlists are invalid. You may also see messages warning you of invalid codes.
 
-​	If any codes were loaded, every new lobby will take a code from the list randomly. Though, you can only have as many custom lobbies as you have words. Once there are more lobbies than the number of codes, normal codes will start being assigned again.
+​	If any codes were loaded, every new lobby will take a code from the lists randomly. Though, you can only have as many custom lobbies as you have words. Once there are more lobbies than the number of codes, normal codes will start being assigned again.
 
 ## 3. Showcase
 

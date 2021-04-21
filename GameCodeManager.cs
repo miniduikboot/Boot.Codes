@@ -8,6 +8,7 @@ using Boot.Codes.Handlers;
 using Boot.Codes.Properties;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Security.Claims;
 using System.Threading;
@@ -28,7 +29,7 @@ namespace Boot.Codes
 
         private readonly IGameCodeFactory _codeFactory;
 
-        public string Path => "Boot.Codes.txt";
+        public string Path => System.IO.Path.GetFullPath("Boot.Codes");
 
         public int SixCharCodes { get; }
 
@@ -38,44 +39,77 @@ namespace Boot.Codes
         {
             this._logger = logger;
             this._codeFactory = codeFactory;
-            logger.LogInformation("Boot.Codes: Reading file.", Path);
+            logger.LogInformation("Boot.Codes: Reading files from {Path}", Path);
 
-            var validCodes = Read().Select(code => new GameCode(code)).Where(code => !code.IsInvalid).ToList().Shuffle();
+            var validCodes = Read().Select(code => new GameCode(code)).Where(code => !code.IsInvalid).AsParallel().ToList().Shuffle();
 
             if (validCodes.Count == 0) return;
 
             this.FourCharCodes = validCodes.Count(code => code.Code.Length == 4);
             this.SixCharCodes = validCodes.Count(code => code.Code.Length == 6);
+            var total = SixCharCodes + FourCharCodes;
+            _logger.LogInformation("Boot.Codes: {total} codes total.", total);
 
-            this._codes = new List<GameCode>(validCodes);
+            this._codes = validCodes;
             this._inUse = new HashSet<GameCode>();
+
 
             eventManager.RegisterListener(new GameEventListener(this));
         }
 
         private IEnumerable<string> Read()
         {
-            if (File.Exists(Path))
+            var dirInfo = new DirectoryInfo(Path);
+
+            if (!dirInfo.Exists)
             {
-                var comment = new[] { "--" };
-                var lines = File.ReadAllLines(Path, Encoding.UTF8)
-                    .Where(line => !line.Trim().StartsWith(comment[0]) && !string.IsNullOrWhiteSpace(line))
-                    .Select(line => line.Trim().Split(comment, 2, StringSplitOptions.None)[0].ToUpper().TrimEnd())
-                    .Distinct().ToArray();
-
-                var invalid = lines.Where(line => line.Length != 6 && line.Length != 4).ToArray();
-                var valid = lines.Where(line => !invalid.Contains(line)).ToArray();
-
-                foreach (var line in invalid)
-                {
-                    _logger.LogWarning($"Boot.Codes: The code \"{line}\" is invalid!", line);
-                }
-
-                return valid;
+                dirInfo.Create();
+                goto fail;
             }
 
-            _logger.LogWarning("Boot.Codes: No word list found.");
-            return Enumerable.Empty<string>();
+            var comment = new[] { "--" };
+            var words = new HashSet<string>();
+
+            const StringSplitOptions splitOptions = StringSplitOptions.None;
+            var startTime = DateTime.Now;
+            
+            foreach (var file in dirInfo.GetFiles())
+            {
+                _logger.LogInformation("Boot.Codes: reading \"{Name}\"", file.Name);
+
+                var query = (File.ReadLines(file.FullName, Encoding.UTF8)
+                    .Where(line => !string.IsNullOrWhiteSpace(line) && !line.TrimStart().StartsWith(comment[0]))
+                    .Select(record => record.Trim().Split(comment, 2, splitOptions)[0].ToUpper().TrimEnd()))
+                    .Where(c => !words.Contains(c)).AsParallel();
+
+                foreach (var result in query) words.Add(result);
+            }
+
+            if (words.Count == 0) goto fail;
+
+            // HashSet for fast lookup.
+            var invalid = words.Where(word => word.Length != 6 && word.Length != 4).ToHashSet();
+            var valid = words.Where(word => !invalid.Contains(word));
+
+            var invalids = 0;
+            foreach (var line in invalid)
+            {
+                if (invalids++ < 5) _logger.LogWarning("Boot.Codes: The code \"{line}\" is invalid!", line);
+                if (invalids == 6) _logger.LogWarning("Boot.Codes: Found more invalid codes, please check your input files and clean them up");
+            }
+            
+            _logger.LogInformation("Boot.Codes: Finished loading files in {Seconds} seconds, with {invalids} invalid codes.", (DateTime.Now - startTime).Seconds, invalids);
+
+            // force GC because there are a lot of useless thing waiting in LOH and G2
+
+            return valid;
+
+            fail:
+            {
+                _logger.LogWarning("Boot.Codes: No word list found.");
+                return Enumerable.Empty<string>();
+            }
+
         }
 
         public GameCode Get()
@@ -102,7 +136,7 @@ namespace Boot.Codes
         {
             lock (_sync)
             {
-                if(!_inUse.Contains(code)) return; // generated by the factory
+                if (!_inUse.Contains(code)) return; // generated by the factory
                 _inUse.Remove(code);
                 _codes.Add(code);
             }
