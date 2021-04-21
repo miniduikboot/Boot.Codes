@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Boot.Codes
@@ -8,7 +9,7 @@ namespace Boot.Codes
         /**
          * Shuffle the array in-place.
          */
-        public static IList<T> Shuffle<T>(this IList<T> list)
+        public static T Shuffle<T>(this T list) where T : IList
         {
             // Implementation of the Fisher-Yates shuffle
             var size = list.Count;
