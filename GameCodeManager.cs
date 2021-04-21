@@ -88,19 +88,22 @@ namespace Boot.Codes
             if (words.Count == 0) goto fail;
 
             // HashSet for fast lookup.
-            var invalid = words.Where(word => word.Length != 6 && word.Length != 4).ToHashSet();
-            var valid = words.Where(word => !invalid.Contains(word));
-
-            var invalids = 0;
-            foreach (var line in invalid)
+            var valid = new List<string>();
+            var invalid = 0;
+            foreach (var word in words)
             {
-                if (invalids++ < 5) _logger.LogWarning("Boot.Codes: The code \"{line}\" is invalid!", line);
-                if (invalids == 6) _logger.LogWarning("Boot.Codes: Found more invalid codes, please check your input files and clean them up");
+                if (word.Length == 6 || word.Length == 4)
+                {
+                    valid.Add(word);
+                }
+                else
+                {
+                    if (invalid++ < 5) _logger.LogWarning("Boot.Codes: The code \"{line}\" is invalid!", word);
+                    if (invalid == 6) _logger.LogWarning("Boot.Codes: Found more invalid codes, please check your input files and clean them up");
+                }
             }
-            
-            _logger.LogInformation("Boot.Codes: Finished loading files in {Seconds} seconds, with {invalids} invalid codes.", (DateTime.Now - startTime).Seconds, invalids);
 
-            // force GC because there are a lot of useless thing waiting in LOH and G2
+            _logger.LogInformation("Boot.Codes: Finished loading files in {Seconds} seconds, with {invalids} invalid codes.", (DateTime.Now - startTime).Seconds, invalid);
 
             return valid;
 
